@@ -217,12 +217,13 @@ async function startServer() {
                     }`;
 
                     const ai = getGenAI();
-                    const response = await ai.models.generateContent({
-                        model: "gemini-2.5-flash-preview-05-20",
+                    const response = await ai.models.generateContent({ 
+                        model: "gemini-3-flash-preview",
                         contents: prompt,
-                        config: {
+                        config: { 
                             responseMimeType: "application/json",
-                            thinkingConfig: { thinkingBudget: 5000 }
+                            // Using a higher level of thinking for better analysis
+                            thinkingConfig: { thinkingLevel: "HIGH" }
                         }
                     });
 
