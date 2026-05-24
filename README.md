@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://kommodo.ai/i/S7av3yeaysNPU2bQHZ3P" />
+<img width="1200" height="475" alt="GHBanner" src="https://postimg.cc/RqgDMTwd" />
 </div>
 
 # Run and deploy your AI Studio app
