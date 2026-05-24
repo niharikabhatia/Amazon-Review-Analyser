@@ -24,18 +24,47 @@ export default function App() {
   const startAnalysis = async (products: string[]) => {
     setState('PROCESSING');
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/analyze', {
+      const initRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ products: products.map(p => ({ name: p })) }),
       });
 
-      if (!response.ok) throw new Error('Analysis failed');
-      
-      const data = await response.json();
-      setResults(data.products);
+      if (!initRes.ok) {
+        const err = await initRes.json().catch(() => ({}));
+        throw new Error((err as any).error || 'Failed to start analysis');
+      }
+
+      const { runs } = await initRes.json();
+      if (!runs || runs.length === 0) throw new Error('No runs were started');
+
+      let pendingRuns = runs;
+      const allProducts: any[] = [];
+      const MAX_POLLS = 30;
+
+      for (let i = 0; i < MAX_POLLS && pendingRuns.length > 0; i++) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        const pollRes = await fetch('/api/poll', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ runs: pendingRuns }),
+        });
+
+        if (!pollRes.ok) throw new Error('Polling failed');
+
+        const { products: done, pending } = await pollRes.json();
+        allProducts.push(...done);
+        pendingRuns = pending;
+      }
+
+      pendingRuns.forEach((r: any) => {
+        allProducts.push({ name: r.rawUrl, error: 'Analysis timed out. Amazon may be rate-limiting. Please try again.' });
+      });
+
+      setResults(allProducts);
       setState('DASHBOARD');
     } catch (err) {
       console.error(err);

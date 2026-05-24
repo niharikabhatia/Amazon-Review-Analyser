@@ -217,13 +217,11 @@ async function startServer() {
                     }`;
 
                     const ai = getGenAI();
-                    const response = await ai.models.generateContent({ 
-                        model: "gemini-3-flash-preview",
+                    const response = await ai.models.generateContent({
+                        model: "gemini-2.0-flash",
                         contents: prompt,
-                        config: { 
-                            responseMimeType: "application/json",
-                            // Using a higher level of thinking for better analysis
-                            thinkingConfig: { thinkingLevel: "HIGH" }
+                        config: {
+                            responseMimeType: "application/json"
                         }
                     });
 
