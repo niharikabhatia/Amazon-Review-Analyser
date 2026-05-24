@@ -18,10 +18,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const client = new ApifyClient({ token: apifyToken });
-    const genAI = new GoogleGenAI({
-        apiKey: geminiKey,
-        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-    });
+    const genAI = new GoogleGenAI({ apiKey: geminiKey });
 
     const products: any[] = [];
     const pending: any[] = [];
