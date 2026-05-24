@@ -102,13 +102,35 @@ OUTPUT FORMAT: Respond with valid JSON only, no markdown.
     "aiVerdict": { "summary": "3-4 sentence buying recommendation", "confidence": "high" }
 }`;
 
-                const response = await genAI.models.generateContent({
-                    model: 'gemini-2.0-flash',
-                    contents: prompt,
-                    config: { responseMimeType: 'application/json' }
-                });
+                let aiSummary: any;
+                try {
+                    const response = await genAI.models.generateContent({
+                        model: 'gemini-2.0-flash',
+                        contents: prompt,
+                        config: { responseMimeType: 'application/json' }
+                    });
 
-                const aiSummary = JSON.parse(response.text);
+                    const rawText = response.text;
+                    if (!rawText || rawText.trim() === '') {
+                        throw new Error('Empty response from Gemini — content may have been filtered.');
+                    }
+
+                    aiSummary = JSON.parse(rawText);
+                } catch (aiErr: any) {
+                    const msg: string = aiErr?.message || '';
+                    let userMsg: string;
+                    if (msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota') || msg.includes('429')) {
+                        userMsg = 'Gemini API quota exceeded. Upgrade your plan or check your GEMINI_API_KEY quota in Google AI Studio.';
+                    } else if (msg.includes('API_KEY') || msg.includes('PERMISSION_DENIED') || msg.includes('401') || msg.includes('403')) {
+                        userMsg = 'Invalid or missing Gemini API key. Check GEMINI_API_KEY in Vercel → Settings → Environment Variables.';
+                    } else if (msg.includes('JSON') || msg.includes('parse') || msg.includes('Unexpected')) {
+                        userMsg = 'AI returned malformed data. Please try again.';
+                    } else {
+                        userMsg = `AI analysis failed: ${msg || 'Unknown error'}. Please try again.`;
+                    }
+                    products.push({ name: productTitle, error: userMsg });
+                    return;
+                }
 
                 products.push({
                     name: aiSummary?.productName || productTitle,
@@ -142,8 +164,17 @@ OUTPUT FORMAT: Respond with valid JSON only, no markdown.
                 pending.push(runInfo);
             }
         } catch (err: any) {
-            console.error('Error processing run:', runInfo.runId, err?.message || err);
-            products.push({ name: runInfo.rawUrl, error: 'An error occurred during analysis. Please try again.' });
+            const msg: string = err?.message || '';
+            console.error('Error processing run:', runInfo.runId, msg || err);
+            let userMsg: string;
+            if (msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota') || msg.includes('429')) {
+                userMsg = 'Gemini API quota exceeded. Check your GEMINI_API_KEY quota in Google AI Studio.';
+            } else if (msg.includes('API_KEY') || msg.includes('PERMISSION_DENIED') || msg.includes('401') || msg.includes('403')) {
+                userMsg = 'Invalid Gemini API key. Check GEMINI_API_KEY in Vercel → Settings → Environment Variables.';
+            } else {
+                userMsg = `Analysis error: ${msg || 'Unknown error'}. Please try again.`;
+            }
+            products.push({ name: runInfo.rawUrl, error: userMsg });
         }
     }));
 
