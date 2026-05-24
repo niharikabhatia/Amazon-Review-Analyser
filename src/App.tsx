@@ -46,7 +46,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f2f2f2] font-sans text-[#232f3e] selection:bg-[#ff9900] selection:text-[#232f3e]">
-      <Header onStart={() => setState('INPUT')} />
+      <Header onStart={() => setState('INPUT')} onHome={() => setState('LANDING')} />
       
       <main className="max-w-7xl mx-auto">
         <AnimatePresence mode="wait">

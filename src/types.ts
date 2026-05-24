@@ -25,6 +25,7 @@ export interface Review {
 
 export interface ProductSummary {
   name: string;
+  productName?: string;
   imageUrl: string;
   productUrl?: string;
   rating: number;

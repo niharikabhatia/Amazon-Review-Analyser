@@ -61,8 +61,8 @@ export const ProductCard = ({ product }: { product: ProductSummary }) => {
           </div>
           <div className="relative z-10 space-y-4">
              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[#FF9900]">✅ AI Verdict</h4>
-                <Badge className="bg-[#FF9900] text-[#232F3E] border-none text-[10px] font-black">DECISION LOGIC</Badge>
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-[#FF9900]">✅ Our Verdict</h4>
+                <Badge className="bg-[#FF9900] text-[#232F3E] border-none text-[10px] font-black">Honest Summary</Badge>
              </div>
              <p className="text-lg font-bold leading-relaxed tracking-tight text-[#232F3E]">
                 &ldquo;{product.aiVerdict.summary}&rdquo;
@@ -103,19 +103,12 @@ export const ProductCard = ({ product }: { product: ProductSummary }) => {
           <div className="flex-1 space-y-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-1">
-                <Badge className="bg-[#232F3E] text-white mb-2 font-bold">{product.category}</Badge>
+                {product.category && product.category.toLowerCase() !== 'general' && (
+                  <Badge className="bg-[#232F3E] text-white mb-2 font-bold">{product.category}</Badge>
+                )}
                 <h3 className="text-2xl font-bold tracking-tight text-[#232F3E] leading-tight">
-                  {product.name}
+                  {product.productName || (product.name && !product.name.startsWith('http') ? product.name : 'Amazon Product')}
                 </h3>
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="flex items-center gap-1 text-[#FF9900]">
-                  <Star className="w-5 h-5 fill-current" />
-                  <span className="text-lg font-bold text-[#232F3E]">{product.rating}</span>
-                </div>
-                <div className="flex items-center gap-1 text-zinc-400 text-xs font-bold">
-                  <Users className="w-3 h-3" /> {product.reviewCount.toLocaleString()} reviews
-                </div>
               </div>
             </div>
 
@@ -254,12 +247,12 @@ export const ProductCard = ({ product }: { product: ProductSummary }) => {
           <div className="mt-12 border-t border-zinc-100 pt-8 space-y-6">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                 📝 Selected Reviews ({product.reviews.length})
+                 📝 Selected Reviews ({Math.min(4, product.reviews.length)})
               </h4>
               <span className="text-[10px] text-zinc-400 font-medium">Real user descriptions</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {product.reviews.map((review, i) => (
+              {product.reviews.slice(0, 4).map((review, i) => (
                 <div key={i} className="p-5 bg-zinc-50 border border-zinc-100 rounded-3xl space-y-3 hover:bg-white hover:border-[#FF9900]/30 hover:shadow-xl transition-all duration-500 group/review">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-0.5">

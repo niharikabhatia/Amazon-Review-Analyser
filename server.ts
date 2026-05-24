@@ -198,6 +198,7 @@ async function startServer() {
                     
                     OUTPUT FORMAT: JSON ONLY
                     {
+                        "productName": "Identify the precise, concise product name (under 10 words, e.g. 'Philips 10-watt LED Bulb') based on the reviews and product info",
                         "sentiment": { "overall": "...", "positive": 80, "mixed": 10, "negative": 10 },
                         "highlights": [ { "label": "Text", "type": "positive", "frequency": "..." } ],
                         "commonComplaints": [ { "label": "Text", "severity": "critical", "frequency": "..." } ],
@@ -220,7 +221,8 @@ async function startServer() {
                     const aiSummary = JSON.parse(response.text);
 
                     return {
-                        name: productTitle || rawUrl,
+                        name: aiSummary?.productName || productTitle || rawUrl,
+                        productName: aiSummary?.productName || productTitle || rawUrl,
                         imageUrl: productImageUrl,
                         productUrl: isUrl ? normalizedUrl : (firstItem.url || productData.url || "https://amazon.com"),
                         rating: productRating,
