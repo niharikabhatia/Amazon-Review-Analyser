@@ -33,7 +33,7 @@ export default async function handler(req: any, res: any) {
             }
 
             if (run.status === 'SUCCEEDED') {
-                const { items } = await client.dataset(runInfo.datasetId).listItems();
+                const { items } = await client.dataset(runInfo.datasetId).listItems() as { items: any[] };
 
                 if (!items || items.length === 0) {
                     products.push({ name: runInfo.rawUrl, error: 'No reviews found. Verify the product link is accessible.' });
