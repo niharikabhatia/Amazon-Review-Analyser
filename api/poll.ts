@@ -6,10 +6,10 @@ export default async function handler(req: any, res: any) {
     }
 
     const apifyToken = process.env.APIFY_API_TOKEN;
-    const geminiKey = process.env.GEMINI_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY;
 
     if (!apifyToken) return res.status(500).json({ error: 'APIFY_API_TOKEN not configured' });
-    if (!geminiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+    if (!openaiKey) return res.status(500).json({ error: 'OPENAI_API_KEY not configured' });
 
     const { runs } = req.body;
     if (!runs || !Array.isArray(runs)) {
@@ -99,38 +99,40 @@ OUTPUT FORMAT: Respond with valid JSON only, no markdown.
 
                 let aiSummary: any;
                 try {
-                    const geminiRes = await fetch(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: prompt }] }],
-                                generationConfig: { responseMimeType: 'application/json' }
-                            })
-                        }
-                    );
+                    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${openaiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-4o-mini',
+                            response_format: { type: 'json_object' },
+                            messages: [{ role: 'user', content: prompt }],
+                            temperature: 0.3
+                        })
+                    });
 
-                    if (!geminiRes.ok) {
-                        const errBody = await geminiRes.json().catch(() => ({})) as any;
-                        throw new Error(errBody?.error?.message || `Gemini HTTP ${geminiRes.status}`);
+                    if (!openaiRes.ok) {
+                        const errBody = await openaiRes.json().catch(() => ({})) as any;
+                        throw new Error(errBody?.error?.message || `OpenAI HTTP ${openaiRes.status}`);
                     }
 
-                    const geminiData = await geminiRes.json() as any;
-                    const rawText: string = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    const openaiData = await openaiRes.json() as any;
+                    const rawText: string = openaiData?.choices?.[0]?.message?.content || '';
 
                     if (!rawText.trim()) {
-                        throw new Error('Empty response from Gemini — content may have been filtered.');
+                        throw new Error('Empty response from OpenAI.');
                     }
 
                     aiSummary = JSON.parse(rawText);
                 } catch (aiErr: any) {
                     const msg: string = aiErr?.message || '';
                     let userMsg: string;
-                    if (msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota') || msg.includes('429')) {
-                        userMsg = 'Gemini API quota exceeded. Check your GEMINI_API_KEY quota at aistudio.google.com/apikey.';
-                    } else if (msg.includes('API_KEY') || msg.includes('PERMISSION_DENIED') || msg.includes('401') || msg.includes('403')) {
-                        userMsg = 'Invalid Gemini API key. Check GEMINI_API_KEY in Vercel → Settings → Environment Variables.';
+                    if (msg.includes('quota') || msg.includes('429') || msg.includes('insufficient_quota')) {
+                        userMsg = 'OpenAI API quota exceeded. Check your usage at platform.openai.com/usage.';
+                    } else if (msg.includes('401') || msg.includes('invalid_api_key') || msg.includes('Unauthorized')) {
+                        userMsg = 'Invalid OpenAI API key. Check OPENAI_API_KEY in Vercel → Settings → Environment Variables.';
                     } else {
                         userMsg = `AI analysis failed: ${msg || 'Unknown error'}. Please try again.`;
                     }
@@ -171,7 +173,7 @@ OUTPUT FORMAT: Respond with valid JSON only, no markdown.
         } catch (err: any) {
             const msg: string = err?.message || '';
             console.error('Error processing run:', runInfo.runId, msg || err);
-            products.push({ name: runInfo.rawUrl, error: `Analysis error: ${msg || 'Unknown error'}. Please try again.` });
+            products.push({ name: runInfo.rawUrl, error: `Error: ${msg || 'Unknown error'}. Please try again.` });
         }
     }));
 
