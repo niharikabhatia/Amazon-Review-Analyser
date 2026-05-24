@@ -103,11 +103,10 @@ OUTPUT FORMAT: JSON ONLY
 }`;
 
                 const response = await genAI.models.generateContent({
-                    model: "gemini-2.5-flash-preview-05-20",
+                    model: "gemini-2.0-flash",
                     contents: prompt,
                     config: {
-                        responseMimeType: "application/json",
-                        thinkingConfig: { thinkingBudget: 5000 }
+                        responseMimeType: "application/json"
                     }
                 });
 
@@ -144,7 +143,8 @@ OUTPUT FORMAT: JSON ONLY
             }
         } catch (err: any) {
             console.error('Error processing run:', runInfo.runId, err);
-            products.push({ name: runInfo.rawUrl, error: 'An error occurred during analysis. Please try again.' });
+            const msg = err?.message || String(err) || 'Unknown error';
+            products.push({ name: runInfo.rawUrl, error: `Analysis failed: ${msg}` });
         }
     }));
 
