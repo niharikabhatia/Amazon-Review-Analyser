@@ -106,7 +106,16 @@ async function startServer() {
                     normalizedUrl = await resolveRedirect(normalizedUrl);
                 }
                 
-                const inputAsin = extractAsin(normalizedUrl);
+                let inputAsin = extractAsin(normalizedUrl);
+                if (inputAsin) {
+                    try {
+                        const u = new URL(normalizedUrl);
+                        const host = u.hostname.replace('www.', '');
+                        normalizedUrl = `https://www.${host}/dp/${inputAsin}`;
+                    } catch (e) {
+                        // keep original url
+                    }
+                }
 
                 try {
                     // STEP 3: APIFY REVIEW EXTRACTION
