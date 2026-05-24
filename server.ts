@@ -224,7 +224,7 @@ async function startServer() {
                         name: aiSummary?.productName || productTitle || rawUrl,
                         productName: aiSummary?.productName || productTitle || rawUrl,
                         imageUrl: productImageUrl,
-                        productUrl: isUrl ? normalizedUrl : (firstItem.url || productData.url || "https://amazon.com"),
+                        productUrl: isUrl ? normalizedUrl : (firstItem.url || firstItem.productUrl || "https://amazon.com"),
                         rating: productRating,
                         reviewCount: productReviewCount,
                         category: firstItem.category || "General",
