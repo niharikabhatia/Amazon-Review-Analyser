@@ -6,7 +6,7 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/39cb3254-8997-4649-91cb-f96a1ae5a1e0
+View My App: https://amazon-review-analyser-red.vercel.app/
 
 ## Run Locally
 
