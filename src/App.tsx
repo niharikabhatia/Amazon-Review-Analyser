@@ -177,12 +177,9 @@ export default function App() {
          <div className="fixed bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-white to-transparent -z-10 pointer-events-none" />
       )}
 
-      {/* Footer — home page only */}
-      {state === 'LANDING' && (
-        <footer className="fixed bottom-0 left-0 right-0 py-3 text-center text-xs font-medium text-zinc-400 bg-white/80 backdrop-blur-sm border-t border-zinc-100">
-          By: Niharika Bhatia
-        </footer>
-      )}
+      <footer className="fixed bottom-0 left-0 right-0 py-3 text-center text-xs font-medium text-zinc-400 bg-white/80 backdrop-blur-sm border-t border-zinc-100">
+        By: Niharika Bhatia
+      </footer>
     </div>
   );
 }
