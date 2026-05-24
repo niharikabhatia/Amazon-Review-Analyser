@@ -143,8 +143,7 @@ OUTPUT FORMAT: JSON ONLY
             }
         } catch (err: any) {
             console.error('Error processing run:', runInfo.runId, err);
-            const msg = err?.message || String(err) || 'Unknown error';
-            products.push({ name: runInfo.rawUrl, error: `Analysis failed: ${msg}` });
+            products.push({ name: runInfo.rawUrl, error: 'An error occurred during analysis. Please try again.' });
         }
     }));
 
